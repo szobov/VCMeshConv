@@ -27,7 +27,7 @@ public:
     //stride==1 means no pool
     void add_pool_layer(int stride, int radius_pool, int radius_unpool)
     {
-        cout<<"## Add Pooling "<<_meshPoolers.size()<<"\n";//<<". stride: "<<stride<<" radius_pool: "<<radius_pool<<" radius_unpool: "<<radius_unpool<<"\n";
+        cout<<"## Add Pooling "<<_meshPoolers.size()<< ". stride: "<<stride<<" radius_pool: "<<radius_pool<<" radius_unpool: "<<radius_unpool<<"\n";
         if(_meshPoolers.size()==0)
         {
             MeshPooler meshPooler;
@@ -98,11 +98,15 @@ public:
     //               neighbor_num, neighbor_id0, neighbor_id1, ..., neighbor_idx, previous_size, ..., previous_size
     void save_pool_and_unpool_neighbor_info_to_npz(const string& save_path)
     {
-        cout<<"Save pool and unpool neighbor info to npz.\n";
+        cout<<"Save pool and unpool neighbor info to npz.\n" << std::endl;
         for(int i=0;i<_meshPoolers.size(); i++)
         {
             int after_pool_size = (_meshPoolers[i]._center_center_map.size());
             int before_pool_size = (_meshPoolers[i]._connection_map.size());
+
+            if (after_pool_size == 0) {
+                break;
+            }
 
             vector<int> pool_neighborID_lst_lst = get_neighborID_lst_lst(_meshPoolers[i]._pool_map, before_pool_size);
 
@@ -110,8 +114,11 @@ public:
 
 
             cout<<"save pool "<<to_string(i)<<".\n";
-            int neighbor_num_pool_2 = pool_neighborID_lst_lst.size()/after_pool_size-1;
-            
+            cout << "oi: " << after_pool_size << " "
+                 << pool_neighborID_lst_lst.size() << std::endl;
+            int neighbor_num_pool_2 =
+                pool_neighborID_lst_lst.size() / after_pool_size - 1;
+
             std::vector<size_t > shape_info = {(size_t)after_pool_size, (size_t)(1+neighbor_num_pool_2) };
             cout<<shape_info[0]<<" "<<shape_info[1]<<"\n";
             //cout<< pool_neighborID_lst_lst.size()<<"\n";

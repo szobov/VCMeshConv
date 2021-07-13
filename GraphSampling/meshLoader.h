@@ -43,7 +43,7 @@ public:
     vector<Vec3<int> > triangles;
 
     bool loadmesh_obj(const string &fileName) {
-        //bool succeed = LoadOBJ(fileName, points, triangles);
+        // bool succeed = LoadOBJ(fileName, points, triangles);
         cout<<"Load mesh "<<fileName<<"\n";
         bool succeed = LoadOBJ_withcolor(fileName, points, colors,triangles);
         if (succeed == false) {
@@ -122,211 +122,105 @@ public:
         }    return true;
     }
 
-    bool LoadOBJ(const string & fileName,
-                 vector< Vec3<float> > & points,
-                 vector< Vec3<int> > & triangles)
-    {
+    void parse_vertex(char *buffer) {
+      Vec3<float> x;
+      Vec3<float> c;
+      char *pch;
+      char *str;
+
+      str = buffer + 2;
+      for (int k = 0; k < 3; ++k) {
+          pch = strtok(str, " ");
+          if (pch) {
+            if (k < 3) {
+                x[k] = static_cast<float>(atof(pch));
+            }
+          }
+          str = NULL;
+      }
+      c = {0, 0, 0};
+
+      points.push_back(x);
+      colors.push_back(c);
+    }
+
+    bool parse_face(char *buffer, Vec3<int> & ip) {
+        // Vec3<int> in;
+        size_t nn = 1;
+        size_t nt = 0;
+        char *pch;
+        char *str;
+
         const char ObjDelimiters[]=" /";
-        const unsigned int BufferSize = 1024;
-        FILE * fid = fopen(fileName.c_str(), "r");
 
-        if (fid)
+        str = buffer+2;
+        for(int k = 0; k < 3; ++k)
         {
-            char buffer[BufferSize];
-            Vec3<int> ip;
-            Vec3<int> in;
-            Vec3<int> it;
-            char * pch;
-            char * str;
-            size_t nn = 0;
-            size_t nt = 0;
-            Vec3<float> x;
-            while (!feof(fid))
+            std::cout << "k: " <<k <<std::endl;
+            pch = strtok (str, ObjDelimiters);
+            if (pch){
+                ip[k] = atoi(pch) - 1;
+            }
+            str = NULL;
+            if (nn > 0)
             {
-                if (!fgets(buffer, BufferSize, fid))
-                {
-                    break;
-                }
-                else if (buffer[0] == 'v')
-                {
-                    if (buffer[1] == ' ')
-                    {
-                        str = buffer+2;
-                        for(int k = 0; k < 3; ++k)
-                        {
-                            pch = strtok (str, " ");
-                            if (pch) x[k] = static_cast<float>(atof(pch));
-                            else
-                            {
-                                return false;
-                            }
-                            str = NULL;
-                        }
-                        points.push_back(x);
-                    }
-                    else if (buffer[1] == 'n')
-                    {
-                        ++nn;
-                    }
-                    else if (buffer[1] == 't')
-                    {
-                        ++nt;
-                    }
-                }
-                else if (buffer[0] == 'f')
-                {
-
-                    str = buffer+2;
-                    for(int k = 0; k < 3; ++k)
-                    {
-                        pch = strtok (str, ObjDelimiters);
-                        if (pch) ip[k] = atoi(pch) - 1;
-                        else
-                        {
-                            return false;
-                        }
-                        str = NULL;
-                        if (nt > 0)
-                        {
-                            pch = strtok (NULL, ObjDelimiters);
-                            if (pch)  it[k] = atoi(pch) - 1;
-                            else
-                            {
-                                return false;
-                            }
-                        }
-                        if (nn > 0)
-                        {
-                            pch = strtok (NULL, ObjDelimiters);
-                            if (pch)  in[k] = atoi(pch) - 1;
-                            else
-                            {
-                                return false;
-                            }
-                        }
-                    }
-                    triangles.push_back(ip);
+                pch = strtok (NULL, ObjDelimiters);
+                if (pch) {
+                    std::cout << "pch" << pch << std::endl;
+                    // in[k] = atoi(pch) - 1;
                 }
             }
-            fclose(fid);
         }
-        else
-        {
-            cout << "File not found" << endl;
-            return false;
-        }
+        std::cout << "push to vec" << std::endl;
+        triangles.push_back(ip);
+        std::cout << "pushed" << std::endl;
         return true;
     }
 
-    bool LoadOBJ_withcolor(const string & fileName,
-                 vector< Vec3<float> > & points, vector< Vec3<float> > & colors,
-                 vector< Vec3<int> > & triangles)
-    {
-        const char ObjDelimiters[]=" /";
-        const unsigned int BufferSize = 1024;
-        FILE * fid = fopen(fileName.c_str(), "r");
+        bool LoadOBJ_withcolor(const string &fileName,
+                               vector<Vec3<float>> &points,
+                               vector<Vec3<float>> &colors,
+                               vector<Vec3<int>> &triangles) {
+      const char ObjDelimiters[] = " /";
+      const unsigned int BufferSize = 1024;
+      FILE *fid = fopen(fileName.c_str(), "r");
 
-        if (fid)
-        {
-            char buffer[BufferSize];
-            Vec3<int> ip;
-            Vec3<int> in;
-            Vec3<int> it;
-            char * pch;
-            char * str;
-            size_t nn = 0;
-            size_t nt = 0;
-            Vec3<float> x;
-            Vec3<float> c;
-            while (!feof(fid))
-            {
-                if (!fgets(buffer, BufferSize, fid))
-                {
-                    break;
-                }
-                else if (buffer[0] == 'v')
-                {
-                    if (buffer[1] == ' ')
-                    {
-                        str = buffer+2;
-                        for(int k = 0; k < 6; ++k)
-                        {
-                            pch = strtok (str, " ");
-                            if (pch) 
-                            {
-                                if(k<3)
-                                {
-                                    x[k] = static_cast<float>(atof(pch));
-                                }
-                                else
-                                {
-                                    c[k-3] = static_cast<float>(atof(pch));
-                                }
-                                
-                            }
-                            else
-                            {
-                                return false;
-                            }
-                            str = NULL;
-                        }
-
-                        points.push_back(x);
-                        colors.push_back(c);
-                        
-                    }
-                    else if (buffer[1] == 'n')
-                    {
-                        ++nn;
-                    }
-                    else if (buffer[1] == 't')
-                    {
-                        ++nt;
-                    }
-                }
-                else if (buffer[0] == 'f')
-                {
-
-                    str = buffer+2;
-                    for(int k = 0; k < 3; ++k)
-                    {
-                        pch = strtok (str, ObjDelimiters);
-                        if (pch) ip[k] = atoi(pch) - 1;
-                        else
-                        {
-                            return false;
-                        }
-                        str = NULL;
-                        if (nt > 0)
-                        {
-                            pch = strtok (NULL, ObjDelimiters);
-                            if (pch)  it[k] = atoi(pch) - 1;
-                            else
-                            {
-                                return false;
-                            }
-                        }
-                        if (nn > 0)
-                        {
-                            pch = strtok (NULL, ObjDelimiters);
-                            if (pch)  in[k] = atoi(pch) - 1;
-                            else
-                            {
-                                return false;
-                            }
-                        }
-                    }
-                    triangles.push_back(ip);
-                }
-            }
-            fclose(fid);
+      if (fid) {
+        char buffer[BufferSize];
+        char *pch;
+        char *str;
+        Vec3<int> ip;
+        while (!feof(fid)) {
+          if (!fgets(buffer, BufferSize, fid)) {
+            return true;
+          }
+          if (buffer == nullptr) {
+              return true;
+          }
+          std::cout << "Line: " << buffer << std::endl;
+          if (buffer[0] == 'v') {
+              if (buffer[1] == ' ') {
+                  parse_vertex(buffer);
+              }
+          } else if (buffer[0] == 'f') {
+            std::cout << "Line: " << buffer[0] << buffer[1] << buffer[2]
+                      << std::endl;
+            parse_face(buffer, ip);
+            std::cout << "parsed face" << std::endl;
+          } else {
+              std::cout << "Unexpected buffer" << std::endl;
+          }
         }
-        else
-        {
-            cout << "File not found" << endl;
-            return false;
-        }
-        return true;
+        std::cout << "finished" << std::endl;
+      } else {
+        cout << "File not found" << endl;
+        return false;
+      }
+      if (fid) {
+        // fclose(fid);
+          return true;
+      }
+      return true;
     }
 
     bool SaveOBJ(const std::string          & fileName,

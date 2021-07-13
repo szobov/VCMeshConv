@@ -315,13 +315,17 @@ int main(int argc, char **argv) {
     mkdir(folder.c_str(), 0755);
        
     std::string outfolderpath = folder+"/body/";
-    mkdir(outfolderpath.c_str(), 0755);    
-    
+    mkdir(outfolderpath.c_str(), 0755);
+
+    std::cerr << "Save pool" << std::endl;
     meshCNN.save_pool_and_unpool_neighbor_info_to_npz(outfolderpath);
+    std::cout << "Saved" << std::endl;
 
-    MeshPooler_Visualizer mpv;    
-    mpv.save_obj_with_colored_sample_points_all_layers(outfolderpath+"center_", mesh,meshCNN);
-
+    MeshPooler_Visualizer mpv;
+    std::cout << "Save colored obj" << std::endl;
+    mpv.save_obj_with_colored_sample_points_all_layers(
+        outfolderpath + "center_", mesh, meshCNN);
+    std::cout << "Saved colored obj" << std::endl;
 
     return 0;
 
